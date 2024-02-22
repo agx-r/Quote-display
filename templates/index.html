@@ -5,11 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global Quotes</title>
 <style>
+* {
+  line-height: 0.5;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 html, body {
   height: 100%;
   margin: 0;
-  background-color: #0E0E0E; /* Nord background color */
-  color: #E5E9F0; /* Nord text color */
+  background-color: #0E0E0E;
+  color: #E5E9F0;
 }
 
 body {
@@ -67,10 +74,6 @@ body {
 
 .bid {
     font-weight: bold;
-}
-
-.volatility {
-
 }
 
 </style>
@@ -132,8 +135,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const quotesSymbolList = [
             "AAPL",
             "^GSPC",
-            "^DJI",
+            "NKE",
             "CL=F",
+            "SI=F",
+            "EURUSD=X",
             "GC=F",
             "AGX"
             ];
@@ -147,9 +152,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // funciton deleteChilds() {
+    // }
+
     function clearAndUpdate() {
-        start();
-        
         var parentContainer = document.getElementById('parentContainer');
 
         dynamicElements.forEach(function(element) {
@@ -159,10 +165,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         dynamicElements = [];
+        start();
     }
 
     start();
-    setInterval(clearAndUpdate, 25000);
+    setInterval(clearAndUpdate, 3600 * 1000); // Обновление раз в час. 3600с = 1ч
 });
 
 function getQuote(symbol) {
