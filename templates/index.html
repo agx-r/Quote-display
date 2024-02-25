@@ -6,16 +6,13 @@
 <title>Global Quotes</title>
 <style>
 * {
-  line-height: 0.5;
+  line-height: 100%;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 html, body {
   height: 100%;
-  margin: 0;
-  background-color: #0E0E0E;
   color: #E5E9F0;
 }
 
@@ -32,24 +29,32 @@ body {
   gap: 8px;
   max-width: 128px;
   height: 100%;
-  padding: 0 8px;
   box-sizing: border-box;
 }
 
 .childContainer {
-  background-color: #0E0E0E; /* Nord panel background color */
+  background-color: #0E0E0E;
   text-align: center;
   width: 100%;
   height: 128px;
   box-sizing: border-box;
-  overflow: hidden;
+  align-items: stretch;
 }
 
 .childContainer p {
-  margin: 0;
-  padding: 8px;
+  height: 25%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   font-family: Arial, sans-serif;
+}
+
+.childContainer p:first-child {
+  margin-top: 4%;
+}
+
+.childContainer p:last-child {
+  margin-bottom: 4%;  
 }
 
 .positive {
@@ -70,6 +75,7 @@ body {
 
 .shortName {
     color: #CCCCCC;
+    font-size: 14px;
 }
 
 .bid {
@@ -133,14 +139,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function start() {
         const quotesSymbolList = [
-            "AAPL",
             "^GSPC",
-            "NKE",
+            "^DJI",
             "CL=F",
+            "GC=F",
             "SI=F",
             "EURUSD=X",
-            "GC=F",
-            "AGX"
             ];
 
         for (let symbol of quotesSymbolList) {
