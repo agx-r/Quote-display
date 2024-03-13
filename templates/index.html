@@ -139,12 +139,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function start() {
         const quotesSymbolList = [
-            "^GSPC",
-            "^DJI",
-            "CL=F",
-            "GC=F",
-            "SI=F",
-            "EURUSD=X",
+            "MSFT",
+            "AAPL",
+            "NVDA",
+            "AMZN",
+            "META",
+            "GOOGL",
+            "BRK-B",
+            "GOOG",
+            "LLY",
+            "AVGO"
             ];
 
         for (let symbol of quotesSymbolList) {
@@ -184,9 +188,10 @@ function getQuote(symbol) {
                 if (data.error) {
                     reject(data.error);
                 } else {
+                    console.log(data);
                     resolve({
                         symbol: data.symbol,
-                        shortName: data.info.shortName,
+                        shortName: data.info.longName,
                         bid: data.info.bid,
                         previousClose: data.info.previousClose
                     });
