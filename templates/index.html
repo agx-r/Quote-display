@@ -128,7 +128,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     volatilityClass = floatContent >= 0 ? "positive" : "negative"
                     paragraph.classList.add(volatilityClass);
 
-                    paragraph.textContent = (floatContent > 0 ? "+" : "")+textInfo.content+" ("+(floatContent > 0 ? "+" : "")+((((bid-previousClose)/previousClose)*100).toFixed(2))+"%)";
+                    let percent = ((floatContent-1)*100).toFixed(3);
+                    let percentString = (percent > 0 ? "+" : "") + percent + "%"
+                    paragraph.textContent = percentString;
                 }
                 container.appendChild(paragraph);
             }
@@ -137,6 +139,15 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(container);
     }
     
+    function getFirstDefinedObject(...objects) {
+        for (const obj of objects) {
+            if (obj != undefined) {
+                return obj;
+            }
+        }
+        return undefined;
+    }
+
     function start() {
         const quotesSymbolList = [
             "MSFT",
@@ -160,8 +171,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         for (let symbol of quotesSymbolList) {
             try {
-                getQuote(symbol).then(result => (notPromise = result)).then(() => {
-                    createContainer(notPromise.symbol, notPromise.shortName, notPromise.bid, ((notPromise.bid/notPromise.previousClose)-1).toFixed(3), notPromise.previousClose)
+                getQuote(symbol).then(result => (quoteData = result)).then(() => {
+                    createContainer(
+                        quoteData.symbol,
+                        quoteData.shortName,
+                        getFirstDefinedObject(quoteData.bid, quoteData.regularMarketOpen).toLocaleString(),
+                        (getFirstDefinedObject(quoteData.bid, quoteData.regularMarketOpen)/getFirstDefinedObject(quoteData.previousClose, quoteData.regularMarketPreviousClose)),
+                        quoteData.previousClose
+                    );
                 });
             }catch{}
         }
@@ -200,6 +217,9 @@ function getQuote(symbol) {
                         symbol: data.symbol,
                         shortName: data.info.longName,
                         bid: data.info.bid,
+                        regularMarketPreviousClose: data.info.regularMarketPreviousClose,
+                        regularMarketOpen: data.info.regularMarketOpen,
+                        dot: data.info.priceHint,
                         previousClose: data.info.previousClose
                     });
                 }
