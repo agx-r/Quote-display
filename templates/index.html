@@ -13,7 +13,6 @@
 
 html, body {
   height: 100%;
-  color: #E5E9F0;
 }
 
 body {
@@ -21,6 +20,8 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  font-size: 12px;
+  background-color: #000000;
 }
 
 .grid-container {
@@ -49,13 +50,13 @@ body {
   font-family: Arial, sans-serif;
 }
 
-.childContainer p:first-child {
+/*.childContainer p:first-child {
   margin-top: 4%;
 }
 
 .childContainer p:last-child {
   margin-bottom: 4%;  
-}
+}*/
 
 .positive {
   background-color: #112211;
@@ -75,10 +76,10 @@ body {
 
 .shortName {
     color: #CCCCCC;
-    font-size: 14px;
 }
 
 .bid {
+    color: #FFFFFF;
     font-weight: bold;
 }
 
@@ -116,14 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             else {
                 var paragraph = document.createElement('p');
-                if (textInfo.class != 'volatility') {
-                    paragraph.textContent = textInfo.content;
-                    paragraph.classList.add(textInfo.class);
-                    if (textInfo.class === 'bid') {
-                        bid = parseFloat(textInfo.content);
-                    }
-                }
-                else {
+                if (textInfo.class == 'volatility') {
                     floatContent = parseFloat(textInfo.content)
                     volatilityClass = floatContent >= 0 ? "positive" : "negative"
                     paragraph.classList.add(volatilityClass);
@@ -131,6 +125,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     let percent = ((floatContent-1)*100).toFixed(3);
                     let percentString = (percent > 0 ? "+" : "") + percent + "%"
                     paragraph.textContent = percentString;
+                }
+                else {
+                    paragraph.textContent = textInfo.content;
+                    paragraph.classList.add(textInfo.class);
+                    if (textInfo.class == 'bid') {
+                        bid = parseFloat(textInfo.content);
+                    }
                 }
                 container.appendChild(paragraph);
             }
@@ -218,7 +219,7 @@ function getQuote(symbol) {
                         shortName: data.info.longName,
                         bid: data.info.bid,
                         regularMarketPreviousClose: data.info.regularMarketPreviousClose,
-                        regularMarketOpen: data.info.regularMarketOpen,
+                        regularMarketOpen: data.info.regularMarketOpen, 
                         dot: data.info.priceHint,
                         previousClose: data.info.previousClose
                     });
