@@ -1,155 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Global Quotes</title>
-<style>
-* {
-  line-height: 100%;
-  margin: 0;
-  padding: 0;
-}
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Quotes</title>
+		<style>
+		    body {
+		  		font-family: Arial, sans-serif;
+		        margin: 0;
+		        padding: 0;
+		  		font-size: 12px;
+		        display: flex;
+		        justify-content: center;
+		        align-items: center;
+		        height: 100vh;
+		        background-color: #0e0e0e;
+		        color: #ffffff;
+		    }
+		    #parentContainer {
+		        display: flex;
+		        justify-content: space-evenly;
+		        width: 100%;
+		    }
+		    .container {
+		        display: flex;
+		        flex-direction: column;
+		        justify-content: center;
+		        align-items: center;
+		        flex-grow: 1;
+		        border: 1px solid #ffffff;
+		        margin: 4px;
+		        padding: 10px;
+		    }
+		    .container p {
+		        margin: 1px 0;
+		        text-align: center;
+		    }
+		    .positive {
+				color: #00FF88;
+				font-weight: bold;
+			}
+			.negative {
+				color: #FF5555;
+				font-weight: bold;
+			}
+			.price {
+				font-weight: bold;
+			}
+			.symbol {
+				font-weight: bold;
+			}
+			.shortName {
+				color: #AAAAAA;
+			}
+		</style>
+	</head>
+<body>
+	<body>
+		<div id="parentContainer">
+		</div>
 
-html, body {
-  height: 100%;
-}
-
-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  font-size: 12px;
-  background-color: #000000;
-}
-
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 8px;
-  max-width: 128px;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.childContainer {
-  background-color: #0E0E0E;
-  text-align: center;
-  width: 100%;
-  height: 128px;
-  box-sizing: border-box;
-  align-items: stretch;
-}
-
-.childContainer p {
-  height: 25%;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  font-family: Arial, sans-serif;
-}
-
-/*.childContainer p:first-child {
-  margin-top: 4%;
-}
-
-.childContainer p:last-child {
-  margin-bottom: 4%;  
-}*/
-
-.positive {
-  background-color: #112211;
-  color: #00FF88;
-  font-weight: bold;
-}
-
-.negative {
-  background-color: #221111;
-  color: #FF5555;
-  font-weight: bold;
-}
-
-.symbol {
-    color: #FFFFFF;
-}
-
-.shortName {
-    color: #CCCCCC;
-}
-
-.bid {
-    color: #FFFFFF;
-    font-weight: bold;
-}
-
-</style>
-</head>
-<div id="parentContainer"></div>
-
-<script>
+		<script>
 var dynamicElements = [];
-document.addEventListener('DOMContentLoaded', function() {
-    function createContainer(symbol, shortName, bid, volatility, previousClose) {
-        var parentContainer = document.querySelector("#parentContainer");
 
-        if (!parentContainer) {
-            return;
+async function getQuote(symbol) {
+    try {
+        const response = await fetch('/get_quote/' + symbol);
+        const data = await response.json();
+        if (data.error) {
+            throw new Error(data.error);
+        } else {
+            return data;
         }
-        
-        var container = document.createElement('div');
-        container.classList.add('childContainer');
-        dynamicElements.push(container);
-
-        var texts = [
-            { class: 'symbol', content: symbol },
-            { class: 'shortName', content: shortName },
-            { class: 'bid', content: bid },
-            { class: 'previousClose', content: previousClose },
-            { class: 'volatility', content: volatility }
-        ];
-
-        var bid = undefined;
-        var previousClose = undefined;
-        texts.forEach(textInfo => {
-            if (textInfo.class == 'previousClose') {
-                previousClose = parseFloat(textInfo.content);
-            }
-            else {
-                var paragraph = document.createElement('p');
-                if (textInfo.class == 'volatility') {
-                    floatContent = parseFloat(textInfo.content)
-                    volatilityClass = floatContent >= 0 ? "positive" : "negative"
-                    paragraph.classList.add(volatilityClass);
-
-                    let percent = ((floatContent-1)*100).toFixed(3);
-                    let percentString = (percent > 0 ? "+" : "") + percent + "%"
-                    paragraph.textContent = percentString;
-                }
-                else {
-                    paragraph.textContent = textInfo.content;
-                    paragraph.classList.add(textInfo.class);
-                    if (textInfo.class == 'bid') {
-                        bid = parseFloat(textInfo.content);
-                    }
-                }
-                container.appendChild(paragraph);
-            }
-        });
-
-        document.body.appendChild(container);
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
     }
-    
-    function getFirstDefinedObject(...objects) {
-        for (const obj of objects) {
-            if (obj != undefined) {
-                return obj;
-            }
-        }
-        return undefined;
+}
+
+async function createContainer(quoteData) {
+    console.log(quoteData);
+    var parentContainer = document.querySelector("#parentContainer");
+
+    if (!parentContainer) {
+        console.error("Parent container not found");
+        return;
     }
 
-    function start() {
+    // Контейнер
+    var container = document.createElement('div');
+    container.classList.add('container');
+    dynamicElements.push(container);
+
+    // Символ
+    var symbolP = document.createElement('p');
+    symbolP.textContent = quoteData.symbol;
+    symbolP.classList.add("symbol");
+    container.appendChild(symbolP);
+
+    // Имя
+    var shortNameP = document.createElement('p');
+    shortNameP.textContent = quoteData.info.shortName;
+    shortNameP.classList.add("shortName");
+    container.appendChild(shortNameP);
+
+    // Бид
+    var priceP = document.createElement('p');
+    var price = undefined;
+    if (quoteData.info.quoteType === "INDEX") {
+        try {
+            const response = await fetch('/price/' + quoteData.symbol);
+            const data = await response.json();
+            price = Number(data.price);
+        } catch (error) {
+            console.error(error);
+        }
+    } else {
+        price = Number(quoteData.info.currentPrice);
+    }
+    priceP.textContent = price;
+    priceP.classList.add("price");
+    container.appendChild(priceP);
+
+    // Динамика
+    var dynamicsP = document.createElement('p');
+    if (quoteData.info.quoteType == "INDEX") {
+        var dynamicNumber = price - quoteData.info.reugularMarketPreviousClose;
+        var dynamicSign = (dynamicNumber > 0 ? "+" : "");
+        dynamicsP.textContent = dynamicSign + dynamicNumber.toFixed(1) + " (+12.34%)";
+    } else {
+        var dynamicNumber = price - quoteData.info.regularMarketPreviousClose;
+        var dynamicSign = (dynamicNumber > 0 ? "+" : "");
+        dynamicsP.textContent = dynamicSign + dynamicNumber.toFixed(1) + " (+12.34%)";
+    }
+    dynamicsP.classList.add("positive");
+    container.appendChild(dynamicsP);
+
+    // Добавление контейнера с инфой в body
+    parentContainer.appendChild(container);
+}
+
+document.addEventListener('DOMContentLoaded', async function () {
+    async function start() {
         const quotesSymbolList = [
             "MSFT",
             "AAPL",
@@ -161,78 +153,41 @@ document.addEventListener('DOMContentLoaded', function() {
             "GOOG",
             "LLY",
             "AVGO",
-
             "^GSPC",
             "^DJI",
             "^IXIC",
             "^NYATR",
             "000001.SS",
             "^FTSE"
-            ];
+        ];
 
         for (let symbol of quotesSymbolList) {
             try {
-                getQuote(symbol).then(result => (quoteData = result)).then(() => {
-                    createContainer(
-                        quoteData.symbol,
-                        quoteData.shortName,
-                        getFirstDefinedObject(quoteData.bid, quoteData.regularMarketOpen).toLocaleString(),
-                        (getFirstDefinedObject(quoteData.bid, quoteData.regularMarketOpen)/getFirstDefinedObject(quoteData.previousClose, quoteData.regularMarketPreviousClose)),
-                        quoteData.previousClose
-                    );
-                });
-            }catch{}
+                const quoteData = await getQuote(symbol);
+                await createContainer(quoteData);
+            } catch (error) {
+                console.error(error);
+            }
         }
     }
 
-    // funciton deleteChilds() {
-    // }
-
-    function clearAndUpdate() {
+    async function clearAndUpdate() {
         var parentContainer = document.getElementById('parentContainer');
 
-        dynamicElements.forEach(function(element) {
+        dynamicElements.forEach(function (element) {
             if (element.parentNode) {
                 element.parentNode.removeChild(element);
             }
         });
 
         dynamicElements = [];
-        start();
+        await start();
     }
 
-    start();
+    await start();
     setInterval(clearAndUpdate, 3600 * 1000); // Обновление раз в час. 3600с = 1ч
 });
 
-function getQuote(symbol) {
-    return new Promise((resolve, reject) => {
-        fetch('/get_quote/' + symbol)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    reject(data.error);
-                } else {
-                    console.log(data);
-                    resolve({
-                        symbol: data.symbol,
-                        shortName: data.info.longName,
-                        bid: data.info.bid,
-                        regularMarketPreviousClose: data.info.regularMarketPreviousClose,
-                        regularMarketOpen: data.info.regularMarketOpen, 
-                        dot: data.info.priceHint,
-                        previousClose: data.info.previousClose
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                reject(error);
-            });
-    });
-}
-</script>
-</body>
+		</script>
+	</body>
 </html>
-
-<!-- bid ; shortName ; symbol ; (bid - previousClose ; bid / previousClose) -->

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Quotes</title>
+<style>
+* {
+  line-height: 100%;
+  margin: 0;
+  margin-bottom: 20px;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 12px;
+  background-color: #000000;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  max-width: 128px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.childContainer {
+  background-color: #0E0E0E;
+  text-align: center;
+  width: 100%;
+  height: 128px;
+  box-sizing: border-box;
+  align-items: stretch;
+}
+
+.childContainer p {
+  height: 25%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+}
+
+.positive {
+  background-color: #112211;
+  color: #00FF88;
+  font-weight: bold;
+}
+
+.negative {
+  background-color: #221111;
+  color: #FF5555;
+  font-weight: bold;
+}
+
+.symbol {
+    color: #FFFFFF;
+}
+
+.shortName {
+    color: #CCCCCC;
+}
+
+.bid {
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+</style>
+</head>
+<div id="parentContainer"></div>
+
+<script>
+var dynamicElements = [];
+document.addEventListener('DOMContentLoaded', function() {
+    function createContainer(symbol, shortName, bid, volatility, previousClose) {
+        var parentContainer = document.querySelector("#parentContainer");
+
+        if (!parentContainer) {
+            return;
+        }
+        
+        var container = document.createElement('div');
+        container.classList.add('childContainer');
+        dynamicElements.push(container);
+
+        var texts = [
+            { class: 'symbol', content: symbol },
+            { class: 'shortName', content: shortName },
+            { class: 'bid', content: bid },
+            { class: 'previousClose', content: previousClose },
+            { class: 'volatility', content: volatility }
+        ];
+
+        var bid = undefined;
+        var previousClose = undefined;
+        texts.forEach(textInfo => {
+            if (textInfo.class == 'previousClose') {
+                previousClose = parseFloat(textInfo.content);
+            }
+            else {
+                var paragraph = document.createElement('p');
+                if (textInfo.class == 'volatility') {
+                    floatContent = parseFloat(textInfo.content)
+                    volatilityClass = 1-floatContent >= 0 ? "positive" : "negative"
+                    paragraph.classList.add(volatilityClass);
+
+                    let percent = ((floatContent-1)*100).toFixed(3);
+                    let percentString = (percent > 0 ? "+" : "") + percent + "%"
+                    paragraph.textContent = percentString;
+                }
+                else {
+                    paragraph.textContent = textInfo.content;
+                    paragraph.classList.add(textInfo.class);
+                    if (textInfo.class == 'bid') {
+                        bid = parseFloat(textInfo.content);
+                    }
+                }
+                container.appendChild(paragraph);
+            }
+        });
+
+        document.body.appendChild(container);
+    }
+    
+    function getFirstDefinedObject(...objects) {
+        for (const obj of objects) {
+            if (obj != undefined) {
+                return obj;
+            }
+        }
+        return undefined;
+    }
+
+    function start() {
+        const quotesSymbolList = [
+            "MSFT",
+            "AAPL",
+            "NVDA",
+            "AMZN",
+            "META",
+            "GOOGL",
+            "BRK-B",
+            "GOOG",
+            "LLY",
+            "AVGO",
+
+            "^GSPC",
+            "^DJI",
+            "^IXIC",
+            "^NYATR",
+            "000001.SS",
+            "^FTSE"
+            ];
+
+        for (let symbol of quotesSymbolList) {
+            try {
+                getQuote(symbol).then(result => (quoteData = result)).then(() => {
+                    createContainer(
+                        quoteData.symbol,
+                        quoteData.shortName,
+                        getFirstDefinedObject(quoteData.bid, quoteData.regularMarketOpen).toLocaleString(),
+                        (getFirstDefinedObject(quoteData.bid, quoteData.regularMarketOpen)/getFirstDefinedObject(quoteData.previousClose, quoteData.regularMarketPreviousClose)),
+                        quoteData.previousClose
+                    );
+                });
+            }catch{}
+        }
+    }
+
+    // funciton deleteChilds() {
+    // }
+
+    function clearAndUpdate() {
+        var parentContainer = document.getElementById('parentContainer');
+
+        dynamicElements.forEach(function(element) {
+            if (element.parentNode) {
+                element.parentNode.removeChild(element);
+            }
+        });
+
+        dynamicElements = [];
+        start();
+    }
+
+    start();
+    setInterval(clearAndUpdate, 3600 * 1000); // Обновление раз в час. 3600с = 1ч
+});
+
+function getQuote(symbol) {
+    return new Promise((resolve, reject) => {
+        fetch('/get_quote/' + symbol)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    reject(data.error);
+                } else {
+                    console.log(data);
+                    resolve({
+                        symbol: data.symbol,
+                        shortName: data.info.longName,
+                        bid: data.info.bid,
+                        regularMarketPreviousClose: data.info.regularMarketPreviousClose,
+                        regularMarketOpen: data.info.regularMarketOpen, 
+                        dot: data.info.priceHint,
+                        previousClose: data.info.previousClose
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                reject(error);
+            });
+    });
+}
+</script>
+</body>
+</html>
+
+<!-- bid ; shortName ; symbol ; (bid - previousClose ; bid / previousClose) -->
