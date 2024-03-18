@@ -2,6 +2,7 @@ import webbrowser
 from flask import Flask, render_template, jsonify, request
 import yfinance as yf
 import asyncio
+import pyautogui, time
 import aiohttp
 
 app = Flask(__name__)
@@ -14,6 +15,8 @@ def open_browser_on_localhost():
     if not browser_opened:
         url = "http://localhost:5000"
         webbrowser.open(url)
+        time.sleep(0.9)
+        pyautogui.press('f11')
         browser_opened = True
 
 async def fetch_quote(session, symbol):

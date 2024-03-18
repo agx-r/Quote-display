@@ -111,12 +111,11 @@ async function createContainer(quoteData) {
         try {
             const response = await fetch('/price/' + quoteData.symbol);
             const data = await response.json();
-            price = Number(data.price);
+            price = Number(data.price).toFixed(2);
         } catch (error) {
-            console.error(error);
         }
     } else {
-        price = Number(quoteData.info.currentPrice);
+        price = Number(quoteData.info.currentPrice).toFixed(2);
     }
     priceP.textContent = price;
     priceP.classList.add("price");
@@ -125,15 +124,15 @@ async function createContainer(quoteData) {
     // Динамика
     var dynamicsP = document.createElement('p');
     if (quoteData.info.quoteType == "INDEX") {
-        var dynamicNumber = price - quoteData.info.reugularMarketPreviousClose;
+        var dynamicNumber = Number(price - parseFloat(quoteData.info.regularMarketPreviousClose));
         var dynamicSign = (dynamicNumber > 0 ? "+" : "");
-        dynamicsP.textContent = dynamicSign + dynamicNumber.toFixed(1) + " (+12.34%)";
+        dynamicsP.textContent = dynamicSign + (dynamicNumber.toFixed(2)).toString() + " ("+((dynamicNumber/price)*100).toFixed(2)+"%)";
     } else {
-        var dynamicNumber = price - quoteData.info.regularMarketPreviousClose;
+        var dynamicNumber = Number(price - parseFloat(quoteData.info.regularMarketPreviousClose));
         var dynamicSign = (dynamicNumber > 0 ? "+" : "");
-        dynamicsP.textContent = dynamicSign + dynamicNumber.toFixed(1) + " (+12.34%)";
+        dynamicsP.textContent = dynamicSign + (dynamicNumber.toFixed(2)).toString() + " ("+((dynamicNumber/price)*100).toFixed(2)+"%)";
     }
-    dynamicsP.classList.add("positive");
+    dynamicsP.classList.add(dynamicNumber >= 0 ? "positive" : "negative");
     container.appendChild(dynamicsP);
 
     // Добавление контейнера с инфой в body
