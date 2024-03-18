@@ -1,8 +1,8 @@
-import webbrowser
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from flask import Flask, render_template, jsonify, request
 import yfinance as yf
 import asyncio
-import pyautogui, time
 import aiohttp
 
 app = Flask(__name__)
@@ -11,13 +11,10 @@ request_queue = asyncio.Queue()
 
 def open_browser_on_localhost():
     print("BROWSER STARTED")
-    global browser_opened
-    if not browser_opened:
-        url = "http://localhost:5000"
-        webbrowser.open(url)
-        time.sleep(0.9)
-        pyautogui.press('f11')
-        browser_opened = True
+    firefox_options = Options()
+    firefox_options.add_argument("--start-fullscreen")
+    driver = webdriver.Firefox(options=firefox_options)
+    driver.get("http://localhost:5000")
 
 async def fetch_quote(session, symbol):
     async with session.get(f"http://localhost:5000/get_quote/{symbol}") as response:
